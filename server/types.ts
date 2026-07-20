@@ -43,7 +43,9 @@ export type DecodedDocument = z.infer<typeof DecodedDocumentSchema>;
 export const CitizenProfileSchema = ProfileFactsSchema.extend({ raw_documents: z.array(DecodedDocumentSchema) });
 export type CitizenProfile = z.infer<typeof CitizenProfileSchema>;
 
-export const LocalizedTextSchema = z.object({ en: z.string(), hi: z.string() });
+// en + hi are always authored in the scheme data; a regional language (e.g. mr) may be
+// added at runtime by the entitlement agent, so extra string keys are permitted.
+export const LocalizedTextSchema = z.object({ en: z.string(), hi: z.string() }).catchall(z.string());
 export const RuleOperatorSchema = z.enum(["equals", "not_equals", "lte", "gte", "lt", "gt", "in", "exists"]);
 export type RuleOperator = z.infer<typeof RuleOperatorSchema>;
 export const SchemeRuleSchema = z.object({

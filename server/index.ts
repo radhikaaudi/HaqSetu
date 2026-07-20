@@ -3,7 +3,9 @@ import express from "express";
 import { buildProfileFromText } from "./agents/intake.js";
 import { runEntitlementEngine } from "./agents/entitlement.js";
 import { buildActions } from "./agents/action.js";
-import { CitizenProfileSchema } from "./types.js";
+import { decodeDocument, mergeDecodedDocument } from "./agents/decoder.js";
+import { verifyDossier } from "./engine/verifier.js";
+import { CitizenProfileSchema, ClaimDossierSchema, type CitizenProfile } from "./types.js";
 
 const app = express();
 app.use(express.json());
@@ -30,13 +32,32 @@ app.post("/entitlements", async (request, response) => {
   }
 });
 app.post("/dossier", async (request, response) => {
-  const parsed = CitizenProfileSchema.safeParse(request.body?.profile);
-  if (!parsed.success) return response.status(400).json({ error: "profile is invalid", details: parsed.error.flatten() });
   const language = typeof request.body?.language === "string" ? request.body.language : "en";
+  const transcript = typeof request.body?.transcript === "string" ? request.body.transcript.trim() : "";
+  const hasImage = typeof request.body?.document_image_base64 === "string" && request.body.document_image_base64.trim();
+  let profile: CitizenProfile;
+  if (request.body?.profile !== undefined) {
+    const parsed = CitizenProfileSchema.safeParse(request.body.profile);
+    if (!parsed.success) return response.status(400).json({ error: "profile is invalid", details: parsed.error.flatten() });
+    profile = parsed.data;
+  } else if (transcript) {
+    profile = { raw_documents: [] };
+  } else if (hasImage) {
+    profile = { raw_documents: [] };
+  } else {
+    return response.status(400).json({ error: "Provide a profile, a transcript, or a document image." });
+  }
   try {
-    const entitlements = await runEntitlementEngine(parsed.data, { language });
-    const filled_forms = await buildActions(parsed.data, entitlements);
-    return response.json({ decoded_documents: parsed.data.raw_documents, entitlements, filled_forms, generated_at: new Date().toISOString(), language });
+    if (transcript && request.body?.profile === undefined) {
+      profile = { ...(await buildProfileFromText(transcript, language)), raw_documents: profile.raw_documents };
+    }
+    if (typeof request.body?.document_image_base64 === "string" && request.body.document_image_base64.trim()) {
+      profile = mergeDecodedDocument(profile, await decodeDocument(request.body.document_image_base64, language));
+    }
+    const entitlements = await runEntitlementEngine(profile, { language });
+    const filled_forms = await buildActions(profile, entitlements);
+    const dossier = ClaimDossierSchema.parse({ decoded_documents: profile.raw_documents, entitlements, filled_forms, generated_at: new Date().toISOString(), language });
+    return response.json(await verifyDossier(dossier, profile));
   } catch (error) {
     return response.status(500).json({ error: error instanceof Error ? error.message : "Dossier generation failed" });
   }

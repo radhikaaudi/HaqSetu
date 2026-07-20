@@ -7,7 +7,10 @@
     "dev": "tsx server/index.ts",
     "start": "tsx server/index.ts",
     "test": "tsx --test test/**/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "forms": "tsx scripts/create-forms.ts",
+    "web": "npm --prefix web run dev",
+    "web:build": "npm --prefix web run build"
   },
   "dependencies": {
     "dotenv": "^16.6.1",

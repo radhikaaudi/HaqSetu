@@ -35,6 +35,18 @@ export class HaqSetuLlmClient {
     return schema.parse(response.output_parsed);
   }
 
+  async parseVision<T>(imageBase64: string, instructions: string, schema: ZodType<T>, schemaName: string): Promise<T> {
+    const imageUrl = imageBase64.startsWith("data:") ? imageBase64 : `data:image/jpeg;base64,${imageBase64}`;
+    const response = await this.client.responses.parse({
+      model: this.model,
+      input: [{ role: "user", content: [{ type: "input_text", text: instructions }, { type: "input_image", image_url: imageUrl, detail: "high" }] }],
+      reasoning: { effort: this.reasoningEffort },
+      text: { format: zodTextFormat(schema, schemaName) }
+    });
+    if (!response.output_parsed) throw new Error("The model returned no structured document result.");
+    return schema.parse(response.output_parsed);
+  }
+
   async callPdfMappingTool(input: string): Promise<string[]> {
     const response = await this.client.responses.create({
       model: this.model,

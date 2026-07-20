@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { access, mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { PDFDocument } from "pdf-lib";
 import { loadSchemes } from "./entitlement.js";
@@ -15,9 +15,22 @@ export async function buildActions(profile: CitizenProfile, eligibleVerdicts: En
   const eligible = new Set(eligibleVerdicts.filter((verdict) => verdict.status === "eligible").map((verdict) => verdict.scheme_id));
   const toolCaller = options.toolCaller ?? new HaqSetuLlmClient();
   const publicDirectory = options.publicDirectory ?? path.resolve(process.cwd(), "generated");
-  return Promise.all(schemes.filter((scheme) => eligible.has(scheme.id) && scheme.form.template).map((scheme) =>
-    buildSchemeAction(profile, scheme, toolCaller, publicDirectory)
-  ));
+  const candidates = await Promise.all(
+    schemes
+      .filter((scheme) => eligible.has(scheme.id) && scheme.form.template)
+      .map(async (scheme) => (await templateExists(scheme) ? buildSchemeAction(profile, scheme, toolCaller, publicDirectory) : null))
+  );
+  // A missing template PDF is skipped, never fatal — the rest of the dossier still builds.
+  return candidates.filter((form): form is FilledForm => form !== null);
+}
+
+async function templateExists(scheme: Scheme): Promise<boolean> {
+  try {
+    await access(path.resolve(process.cwd(), scheme.form.template));
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function buildSchemeAction(profile: CitizenProfile, scheme: Scheme, toolCaller: PdfMappingToolCaller, publicDirectory: string): Promise<FilledForm> {

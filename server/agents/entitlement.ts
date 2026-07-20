@@ -51,9 +51,10 @@ async function runSchemeAgent(profile: CitizenProfile, scheme: Scheme, language:
 
 function applyLocalizedWhy(verdict: EntitlementVerdict, generated: z.infer<typeof WhySchema>, language: string): EntitlementVerdict {
   const byId = new Map(generated.explanations.map((entry) => [entry.id, entry.text]));
-  const localize = (rules: { id: string; explain: { en: string; hi: string } }[] | undefined) => rules?.map((rule) => {
+  // Store the generated "why" under the requested language key; en/hi baked text stays as fallback.
+  const localize = (rules: EntitlementVerdict["matched_rules"] | undefined) => rules?.map((rule) => {
     const text = byId.get(rule.id);
-    return text && (language === "hi" || language === "en") ? { ...rule, explain: { ...rule.explain, [language]: text } } : rule;
+    return text ? { ...rule, explain: { ...rule.explain, [language]: text } } : rule;
   });
   return { ...verdict, matched_rules: localize(verdict.matched_rules) ?? [], ...(verdict.failed_rules ? { failed_rules: localize(verdict.failed_rules) } : {}) };
 }

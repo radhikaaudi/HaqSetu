@@ -6,7 +6,7 @@ import { HaqSetuLlmClient } from "../llm/client.js";
 import { SchemeSchema, type CitizenProfile, type EntitlementVerdict, type Scheme } from "../types.js";
 
 const FactMappingSchema = z.object({
-  mappings: z.array(z.object({ rule_id: z.string(), fact_path: z.string(), source_fact: z.string().optional() }))
+  mappings: z.array(z.object({ rule_id: z.string(), fact_path: z.string(), source_fact: z.string().nullable() }))
 });
 const WhySchema = z.object({
   explanations: z.array(z.object({ id: z.string(), text: z.string() }))

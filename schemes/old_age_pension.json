@@ -1,0 +1,42 @@
+{
+  "id": "old_age_pension",
+  "name": { "en": "Old Age Pension Scheme", "hi": "वृद्धावस्था पेंशन योजना" },
+  "authority": "State Social Welfare Department",
+  "note": "Representative demo rules for HaqSetu. Production must load the authority's official eligibility rules.",
+  "benefit": { "type": "cash", "amount_inr_per_month": 1000 },
+  "eligibility": [
+    {
+      "id": "senior_age",
+      "fact": "age",
+      "op": "gte",
+      "value": 60,
+      "explain": { "en": "You are 60 years or older", "hi": "आपकी आयु 60 वर्ष या अधिक है" }
+    },
+    {
+      "id": "income_below_limit",
+      "fact": "annual_income_inr",
+      "op": "lte",
+      "value": 200000,
+      "explain": { "en": "Your annual income is below ₹2,00,000", "hi": "आपकी वार्षिक आय ₹2,00,000 से कम है" }
+    }
+  ],
+  "required_documents": [
+    { "id": "aadhaar", "name": { "en": "Aadhaar card", "hi": "आधार कार्ड" } },
+    { "id": "age_proof", "name": { "en": "Age proof (birth certificate / Aadhaar)", "hi": "आयु प्रमाण (जन्म प्रमाण पत्र / आधार)" } },
+    { "id": "income_cert", "name": { "en": "Income certificate", "hi": "आय प्रमाण पत्र" } },
+    { "id": "bank_passbook", "name": { "en": "Bank account passbook", "hi": "बैंक खाता पासबुक" } }
+  ],
+  "form": {
+    "template": "forms/old_age_pension.pdf",
+    "fields": [
+      { "pdf_field": "applicant_name", "from_fact": "full_name" },
+      { "pdf_field": "age", "from_fact": "age" },
+      { "pdf_field": "annual_income", "from_fact": "annual_income_inr" },
+      { "pdf_field": "district", "from_fact": "district" }
+    ]
+  },
+  "submission": {
+    "where": { "en": "Block Development Office or the state social welfare portal", "hi": "खंड विकास कार्यालय या राज्य समाज कल्याण पोर्टल" },
+    "deadline": null
+  }
+}

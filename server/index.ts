@@ -1,6 +1,8 @@
 import "dotenv/config";
 import express from "express";
 import { buildProfileFromText } from "./agents/intake.js";
+import { runEntitlementEngine } from "./agents/entitlement.js";
+import { CitizenProfileSchema } from "./types.js";
 
 const app = express();
 app.use(express.json());
@@ -14,6 +16,15 @@ app.post("/intake", async (request, response) => {
     return response.json(await buildProfileFromText(transcript, language));
   } catch (error) {
     return response.status(500).json({ error: error instanceof Error ? error.message : "Intake failed" });
+  }
+});
+app.post("/entitlements", async (request, response) => {
+  const parsed = CitizenProfileSchema.safeParse(request.body?.profile);
+  if (!parsed.success) return response.status(400).json({ error: "profile is invalid", details: parsed.error.flatten() });
+  try {
+    return response.json(await runEntitlementEngine(parsed.data, { language: request.body?.language }));
+  } catch (error) {
+    return response.status(500).json({ error: error instanceof Error ? error.message : "Entitlement evaluation failed" });
   }
 });
 const port = Number(process.env.PORT ?? 3000);

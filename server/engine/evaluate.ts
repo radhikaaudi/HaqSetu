@@ -21,7 +21,7 @@ export function evaluateScheme(profile: CitizenProfile, scheme: Scheme): Entitle
   const missing_facts: string[] = [];
 
   for (const rule of scheme.eligibility) {
-    const fact = profile[rule.fact as keyof CitizenProfile] as Fact<unknown> | undefined;
+    const fact = findFact(profile, rule.fact);
     if (!fact && rule.op !== "exists") { missing_facts.push(rule.fact); continue; }
     if (evaluateRule(fact, rule.op, rule.value)) matched_rules.push({ id: rule.id, explain: rule.explain });
     else failed_rules.push({ id: rule.id, explain: rule.explain });
@@ -32,4 +32,17 @@ export function evaluateScheme(profile: CitizenProfile, scheme: Scheme): Entitle
     ...(failed_rules.length ? { failed_rules } : {}), ...(missing_facts.length ? { missing_facts } : {}),
     required_documents: scheme.required_documents
   };
+}
+
+/** Resolves a scheme fact path without losing the source fact's provenance. */
+function findFact(profile: CitizenProfile, path: string): Fact<unknown> | undefined {
+  const [root, ...nested] = path.split(".");
+  const source = profile[root as keyof CitizenProfile] as Fact<unknown> | undefined;
+  if (!source) return undefined;
+  let value: unknown = source.value;
+  for (const key of nested) {
+    if (!value || typeof value !== "object" || !(key in value)) return undefined;
+    value = (value as Record<string, unknown>)[key];
+  }
+  return { ...source, value };
 }

@@ -1,0 +1,47 @@
+{
+  "id": "mgnrega_jobcard",
+  "name": { "en": "MGNREGA Job Card (100 days guaranteed wage work)", "hi": "मनरेगा जॉब कार्ड (100 दिन गारंटीड मज़दूरी काम)" },
+  "authority": "Ministry of Rural Development / Gram Panchayat",
+  "note": "Representative demo rules for HaqSetu. Production must load the authority's official eligibility rules.",
+  "benefit": { "type": "entitlement", "description_en": "Up to 100 days of guaranteed wage employment per household per year", "description_hi": "प्रति परिवार प्रति वर्ष 100 दिन तक गारंटीड मज़दूरी रोज़गार" },
+  "eligibility": [
+    {
+      "id": "adult_age",
+      "fact": "age",
+      "op": "gte",
+      "value": 18,
+      "explain": { "en": "You are an adult (18+)", "hi": "आप वयस्क हैं (18+)" }
+    },
+    {
+      "id": "rural_resident",
+      "fact": "area_type",
+      "op": "equals",
+      "value": "rural",
+      "explain": { "en": "You live in a rural area", "hi": "आप ग्रामीण क्षेत्र में रहते हैं" }
+    },
+    {
+      "id": "willing_manual_work",
+      "fact": "willing_unskilled_work",
+      "op": "equals",
+      "value": true,
+      "explain": { "en": "You are willing to do unskilled manual work", "hi": "आप अकुशल शारीरिक कार्य करने के इच्छुक हैं" }
+    }
+  ],
+  "required_documents": [
+    { "id": "aadhaar", "name": { "en": "Aadhaar card", "hi": "आधार कार्ड" } },
+    { "id": "residence_proof", "name": { "en": "Proof of residence in the village", "hi": "गाँव में निवास का प्रमाण" } },
+    { "id": "photo", "name": { "en": "Passport photos of adult members", "hi": "वयस्क सदस्यों के पासपोर्ट फोटो" } }
+  ],
+  "form": {
+    "template": "forms/mgnrega_jobcard.pdf",
+    "fields": [
+      { "pdf_field": "applicant_name", "from_fact": "full_name" },
+      { "pdf_field": "age", "from_fact": "age" },
+      { "pdf_field": "village_district", "from_fact": "district" }
+    ]
+  },
+  "submission": {
+    "where": { "en": "Your Gram Panchayat office", "hi": "आपका ग्राम पंचायत कार्यालय" },
+    "deadline": null
+  }
+}

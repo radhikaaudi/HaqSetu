@@ -23,6 +23,8 @@ const ProfileFactsSchema = z.object({
   owns_land: FactSchema(z.boolean()).optional(),
   occupation: FactSchema(z.string()).optional(),
   children: FactSchema(z.object({ count: z.number(), girls: z.number(), in_school: z.number() })).optional()
+  ,area_type: FactSchema(z.enum(["rural", "urban"])).optional()
+  ,willing_unskilled_work: FactSchema(z.boolean()).optional()
 });
 
 export const DecodedDocumentSchema = z.object({

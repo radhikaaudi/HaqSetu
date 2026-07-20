@@ -1,0 +1,42 @@
+{
+  "id": "food_security_nfsa",
+  "name": { "en": "Food Security / Ration Card (NFSA)", "hi": "खाद्य सुरक्षा / राशन कार्ड (एनएफएसए)" },
+  "authority": "Department of Food and Civil Supplies",
+  "note": "Representative demo rules for HaqSetu. Production must load the authority's official eligibility rules.",
+  "benefit": { "type": "in_kind", "description_en": "Subsidised foodgrain (rice/wheat) per person per month", "description_hi": "प्रति व्यक्ति प्रति माह सब्सिडी वाला अनाज (चावल/गेहूं)" },
+  "eligibility": [
+    {
+      "id": "income_below_limit",
+      "fact": "annual_income_inr",
+      "op": "lte",
+      "value": 300000,
+      "explain": { "en": "Your annual household income is below ₹3,00,000", "hi": "आपकी वार्षिक पारिवारिक आय ₹3,00,000 से कम है" }
+    },
+    {
+      "id": "has_household",
+      "fact": "household_size",
+      "op": "gte",
+      "value": 1,
+      "explain": { "en": "You have a household to cover", "hi": "आपके परिवार में सदस्य हैं" }
+    }
+  ],
+  "required_documents": [
+    { "id": "aadhaar", "name": { "en": "Aadhaar cards of all family members", "hi": "सभी परिवार के सदस्यों के आधार कार्ड" } },
+    { "id": "income_cert", "name": { "en": "Income certificate", "hi": "आय प्रमाण पत्र" } },
+    { "id": "residence_proof", "name": { "en": "Proof of residence", "hi": "निवास प्रमाण" } },
+    { "id": "photo", "name": { "en": "Passport photo of head of family", "hi": "परिवार के मुखिया का पासपोर्ट फोटो" } }
+  ],
+  "form": {
+    "template": "forms/food_security_nfsa.pdf",
+    "fields": [
+      { "pdf_field": "head_of_family", "from_fact": "full_name" },
+      { "pdf_field": "family_members", "from_fact": "household_size" },
+      { "pdf_field": "annual_income", "from_fact": "annual_income_inr" },
+      { "pdf_field": "district", "from_fact": "district" }
+    ]
+  },
+  "submission": {
+    "where": { "en": "Fair Price Shop / Tehsil food supply office or the state ration portal", "hi": "उचित मूल्य की दुकान / तहसील खाद्य आपूर्ति कार्यालय या राज्य राशन पोर्टल" },
+    "deadline": null
+  }
+}

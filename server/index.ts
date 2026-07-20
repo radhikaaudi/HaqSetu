@@ -8,7 +8,7 @@ import { verifyDossier } from "./engine/verifier.js";
 import { CitizenProfileSchema, ClaimDossierSchema, type CitizenProfile } from "./types.js";
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "25mb" }));
 app.use("/generated", express.static("generated"));
 app.get("/health", (_request, response) => response.json({ status: "ok" }));
 app.post("/intake", async (request, response) => {

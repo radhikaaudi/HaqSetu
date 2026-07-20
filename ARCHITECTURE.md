@@ -1,4 +1,4 @@
-# HaqSetu — Architecture & Technical Blueprint
+# HaqSetu — Architecture & Technical Blueprint mm
 
 > Companion to [`PROBLEM_STATEMENT.md`](PROBLEM_STATEMENT.md) (the locked anchor). This is **how** we build it. Codex reads this file to understand the system before writing code.
 

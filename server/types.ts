@@ -69,7 +69,10 @@ export type EntitlementVerdict = z.infer<typeof EntitlementVerdictSchema>;
 
 export const FilledFormSchema = z.object({
   scheme_id: z.string(), pdf_url: z.string(),
-  fields: z.array(z.object({ pdf_field: z.string(), value: z.string(), from_fact: z.string(), provenance: ProvenanceSchema }))
+  fields: z.array(z.object({ pdf_field: z.string(), value: z.string(), from_fact: z.string(), provenance: ProvenanceSchema })),
+  needs_info: z.array(z.string()).optional(),
+  required_documents: z.array(z.unknown()).optional(),
+  submission: z.object({ where: LocalizedTextSchema, deadline: z.string().nullable() }).optional()
 });
 export type FilledForm = z.infer<typeof FilledFormSchema>;
 export const ClaimDossierSchema = z.object({

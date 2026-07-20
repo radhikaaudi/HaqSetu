@@ -34,4 +34,28 @@ export class HaqSetuLlmClient {
     if (!response.output_parsed) throw new Error("The model returned no structured intake result.");
     return schema.parse(response.output_parsed);
   }
+
+  async callPdfMappingTool(input: string): Promise<string[]> {
+    const response = await this.client.responses.create({
+      model: this.model,
+      input,
+      reasoning: { effort: this.reasoningEffort },
+      tools: [{
+        type: "function",
+        name: "map_pdf_fields",
+        description: "Select PDF fields that have a source fact. Never provide a value.",
+        strict: true,
+        parameters: {
+          type: "object", additionalProperties: false,
+          properties: { pdf_fields: { type: "array", items: { type: "string" } } },
+          required: ["pdf_fields"]
+        }
+      }],
+      tool_choice: { type: "function", name: "map_pdf_fields" }
+    });
+    const call = response.output.find((item) => item.type === "function_call" && item.name === "map_pdf_fields");
+    if (!call || call.type !== "function_call") return [];
+    const parsed = JSON.parse(call.arguments) as { pdf_fields?: unknown };
+    return Array.isArray(parsed.pdf_fields) && parsed.pdf_fields.every((field) => typeof field === "string") ? parsed.pdf_fields : [];
+  }
 }

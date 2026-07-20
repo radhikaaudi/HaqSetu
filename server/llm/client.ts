@@ -1,5 +1,7 @@
 import "dotenv/config";
 import OpenAI from "openai";
+import { zodTextFormat } from "openai/helpers/zod";
+import type { ZodType } from "zod";
 
 export type ReasoningEffort = "low" | "medium" | "high";
 export interface HaqSetuLlmOptions { model?: string; reasoningEffort?: ReasoningEffort; }
@@ -17,5 +19,19 @@ export class HaqSetuLlmClient {
   }
   respond(input: string) {
     return this.client.responses.create({ model: this.model, input, reasoning: { effort: this.reasoningEffort } });
+  }
+
+  async parse<T>(input: string, instructions: string, schema: ZodType<T>, schemaName: string): Promise<T> {
+    const response = await this.client.responses.parse({
+      model: this.model,
+      input: [
+        { role: "system", content: instructions },
+        { role: "user", content: input }
+      ],
+      reasoning: { effort: this.reasoningEffort },
+      text: { format: zodTextFormat(schema, schemaName) }
+    });
+    if (!response.output_parsed) throw new Error("The model returned no structured intake result.");
+    return schema.parse(response.output_parsed);
   }
 }

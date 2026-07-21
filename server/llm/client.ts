@@ -4,47 +4,30 @@ import { zodResponseFormat } from "openai/helpers/zod";
 import type { ZodType } from "zod";
 
 export type ReasoningEffort = "low" | "medium" | "high";
-export type LlmProvider = "openai" | "gemini";
-export interface HaqSetuLlmOptions { model?: string; reasoningEffort?: ReasoningEffort; provider?: LlmProvider; }
+export interface HaqSetuLlmOptions { model?: string; reasoningEffort?: ReasoningEffort; }
 
 /**
- * Thin edge-only wrapper; eligibility decisions must remain in server/engine.
+ * Thin edge-only wrapper around OpenAI GPT-5.6. Eligibility decisions must remain in server/engine;
+ * this client only does the messy-input / plain-language work at the edges of the pipeline.
  *
- * Provider is selected by LLM_PROVIDER ("openai" | "gemini"). Both are driven
- * through the OpenAI SDK's chat.completions API — Gemini exposes an
- * OpenAI-compatible endpoint — so the four public methods stay identical and
- * the agents never need to know which model is behind them.
- *
- * NOTE FOR SUBMISSION: the Hackathon requires GPT-5.6. Set LLM_PROVIDER=openai
- * for the version you demo and hand to judges. Gemini is a free dev/fallback.
+ * Uses the OpenAI SDK's chat.completions API with schema-enforced structured output, vision, and
+ * programmatic tool calling. The default model is the GPT-5.6 "terra" tier, with configurable
+ * reasoning effort.
  */
 export class HaqSetuLlmClient {
   private readonly client: OpenAI;
   private readonly model: string;
   private readonly reasoningEffort: ReasoningEffort;
-  private readonly provider: LlmProvider;
 
   constructor(options: HaqSetuLlmOptions = {}) {
-    this.provider = options.provider ?? (process.env.LLM_PROVIDER as LlmProvider | undefined) ?? "openai";
     this.reasoningEffort = options.reasoningEffort ?? (process.env.OPENAI_REASONING_EFFORT as ReasoningEffort | undefined) ?? "medium";
-
-    if (this.provider === "gemini") {
-      if (!process.env.GEMINI_API_KEY) throw new Error("GEMINI_API_KEY is required when LLM_PROVIDER=gemini; get a free key at https://aistudio.google.com/apikey");
-      this.client = new OpenAI({
-        apiKey: process.env.GEMINI_API_KEY,
-        baseURL: "https://generativelanguage.googleapis.com/v1beta/openai/"
-      });
-      this.model = options.model ?? process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
-    } else {
-      if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required; copy .env.example to .env.");
-      this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-      this.model = options.model ?? process.env.OPENAI_MODEL ?? "gpt-5.6-terra";
-    }
+    if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required; copy .env.example to .env and set your key.");
+    this.client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    this.model = options.model ?? process.env.OPENAI_MODEL ?? "gpt-5.6-terra";
   }
 
-  /** reasoning_effort is an OpenAI-only knob; Gemini ignores it, so we omit it there. */
   private reasoningParams(): Record<string, unknown> {
-    return this.provider === "openai" ? { reasoning_effort: this.reasoningEffort } : {};
+    return { reasoning_effort: this.reasoningEffort };
   }
 
   async respond(input: string): Promise<string> {

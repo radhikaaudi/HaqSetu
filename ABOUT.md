@@ -163,9 +163,9 @@ stayed with me.
   couldn't iterate as freely as the work deserved: every test run, every document
   I wanted to try, every re-run of the pipeline cost credits I had to ration. It
   forced a discipline I didn't expect — leaning on the test cases Codex helped me
-  write to catch problems *before* spending a live call, and architecting the model
-  client so the provider is **switchable behind one config flag**, so the system
-  could keep being built and demoed even when the primary model's quota ran dry.
+  write (they mock the model, so they cost nothing) to catch problems *before*
+  spending a live call, and keeping the model client thin and configurable so the
+  model tier and reasoning effort could be tuned to spend as little as possible.
   Building something this ambitious under a hard resource limit was the toughest —
   and most honest — part of the whole project.
 

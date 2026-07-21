@@ -102,7 +102,7 @@ npm --prefix web install
 
 # 2. Configure the key
 cp .env.example .env        # then edit .env and set OPENAI_API_KEY=...
-                            # LLM_PROVIDER=openai and OPENAI_MODEL=gpt-5.6-terra are the defaults
+                            # OPENAI_MODEL defaults to gpt-5.6-terra
 
 # 3. Run the backend (http://localhost:3000)
 npm run dev
@@ -114,10 +114,6 @@ npm run web
 Open **http://localhost:5173**, pick a language, and either tap 🎤 to speak, type
 in the box, or 📷 upload a photo of a document. The web app proxies the API to the
 backend automatically (see `web/vite.config.ts`) — no CORS setup needed.
-
-> **Free fallback for development:** set `LLM_PROVIDER=gemini` and `GEMINI_API_KEY`
-> to build and demo without OpenAI credits. The submission version runs on GPT-5.6
-> (`LLM_PROVIDER=openai`).
 
 ### Test it without the UI
 
@@ -145,7 +141,7 @@ npm run typecheck # strict TypeScript, no emit
 
 ```
 server/
-  llm/client.ts         Edge-only model wrapper (provider-switchable: openai | gemini)
+  llm/client.ts         Edge-only GPT-5.6 wrapper (structured output, vision, tools)
   agents/intake.ts      Voice/text  → provenance-carrying facts
   agents/decoder.ts     Document photo → meaning + facts (vision)
   agents/entitlement.ts One concurrent agent per scheme; code decides, model explains

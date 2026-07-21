@@ -6,6 +6,106 @@ for the opening so it feels real, then switch to English for the walkthrough.
 
 ---
 
+## 🎯 THE PROBLEM, THE PROBLEM STATEMENT & THE SOLUTION (explain this in the video)
+
+> Read/adapt this so the judges understand **exactly** what you're solving and why it matters,
+> before you show the app. The condensed spoken version is at the end of this section.
+
+### A) The problem (the reality on the ground)
+In India, hundreds of millions of low-income and rural people are **legally entitled** to real,
+budgeted money and services — widow pensions, girl-child scholarships, food rations, old-age
+pensions, wage-guarantee work. The money exists. It is set aside for them by law. And every year,
+an enormous share of it is **never claimed** — not because people don't qualify, but because the
+benefit reaches them as an **intimidating form, in a language that isn't theirs, behind a process
+no one ever explained.**
+
+For the poorest person, claiming a benefit demands the three things they are *least* equipped to do:
+1. **Know it exists** — out of hundreds of overlapping central, state, and local schemes.
+2. **Prove they qualify** — decode dense eligibility rules and gather the right documents.
+3. **File it correctly** — the right form, the right office, the right way, before the deadline.
+
+Because they often **cannot read the paper in front of them**, one of two unjust things happens:
+- They **silently lose** what they're owed — the money is budgeted and simply never reaches them, or
+- They **pay a middleman** (a *dalal*) a cut of their own entitlement to read and file for them —
+  turning a right into a bribe, and routinely getting defrauded.
+
+### B) The problem statement (one sentence — this is the anchor)
+> **For hundreds of millions of low-income and rural people, the money and services they are legally
+> entitled to are locked behind paperwork they cannot read and processes they cannot navigate — so
+> they either silently lose what they're owed, or pay a middleman a cut of it to claim it for them.**
+
+And the gap, stated plainly: **no tool today takes a person's *real situation* and their *real
+documents*, in their *own spoken language*, and hands back a *verified list of what they can claim*
+and the *completed paperwork* to claim it.** That missing bridge is what I'm building.
+
+### C) Why everything that exists today fails this exact person
+- **Government portals/apps** assume literacy, a smartphone, data, and that you already know which
+  scheme to search for. Online-only forms are a wall, not a door.
+- **Scheme-finder sites** give you a *list to read* — the one thing a low-literacy user can't do.
+- **NGO camps** genuinely help but are human-bound; a fieldworker covers a village a week, not a state.
+- **Middlemen** are effective but extract a cut and defraud people — they *are* the problem.
+- **Generic AI chatbots** produce *words, not action* — they don't read your actual document, don't
+  verify eligibility against real rules, don't hand back a filled form, and — most dangerously —
+  they **hallucinate eligibility**, which in this domain means a wasted bus trip and humiliation.
+
+### D) The solution I'm building — HaqSetu (*हक़ सेतु*, "the bridge to your rights")
+**HaqSetu turns a spoken sentence and a photographed document — in the user's own language — into one
+deliverable: the Claim Dossier.** The user just speaks, or snaps a photo of any official paper, and
+HaqSetu returns three things:
+1. **📄 What this paper means** — any document decoded in their language: what it is, the deadline,
+   and whether it's an opportunity, a debt, or a scam.
+2. **💰 What you're owed but aren't claiming** — a ranked list of every benefit they qualify for,
+   each with a plain-language **"why you qualify"** that **cites the exact government rule** it matched.
+3. **✅ Your ready-to-file paperwork** — the **completed official form**, a "bring these" checklist,
+   and where and by when to submit.
+
+The conversation is only the door in. **The output is a verifiable packet — that's exactly why
+HaqSetu is not a chatbot.**
+
+### E) How it works (say this to score on technical implementation)
+The core design decision: **the AI lives at the edges; a deterministic rules engine lives at the core.**
+- **Multimodal** — it reads the user's real documents by photo, and serves the non-literate user by voice.
+- **Multi-agent orchestration** — it runs **one agent per scheme, concurrently** — a real parallel system.
+- **Programmatic tool calling** — the model *selects* which form fields have a backing fact; **code**
+  fills the value. The model can never invent one.
+- **The Verifier (the moat)** — before anything reaches the user, every entitlement must cite the
+  **rule** it matched and every filled field must cite the **fact** it came from. **No rule → no claim.
+  No fact → no field.** It is structurally impossible for HaqSetu to hallucinate that you qualify.
+
+### F) Why it matters (the stakes)
+This isn't a convenience app. For these families, an unclaimed ₹1,000 pension or a missed scholarship
+is the difference between eating and not, between a child staying in school and dropping out.
+**North Star: no one should lose what they are legally owed simply because they cannot read a form.**
+
+---
+
+### 🎙️ Detailed spoken version (read this aloud — ~60–75 seconds)
+
+> Use this as an extended opening if you want the problem explained in full before the live demo.
+> If you're tight on time, use the shorter Beat 1 in PART 2 instead.
+
+"In India, hundreds of millions of poor and rural people are legally owed real money and services —
+pensions, scholarships, food rations, wage work. The money is budgeted. It's theirs by law. But every
+year, a huge share of it is never claimed — not because they don't qualify, but because it arrives as
+a form they cannot read, in a language that isn't theirs, behind a process no one explained.
+
+So one of two unfair things happens. Either they silently lose what they're owed — or they pay a
+middleman a cut of their own entitlement just to read and file the paperwork for them. A right becomes
+a bribe the moment someone else has to read the paper for you.
+
+I'm building HaqSetu — the bridge to your rights. You just speak your situation, or photograph any
+official document, in your own language. HaqSetu decodes the paper, finds every benefit you qualify
+for — citing the exact government rule for each one — and fills your real forms, ready to file.
+
+And it never guesses. Eligibility is decided by a deterministic rules engine, not the AI, and a
+verifier drops anything it can't back with a real rule and a real fact. No rule, no claim. No fact,
+no field. That's why HaqSetu isn't a chatbot — it hands you a verified, filled, ready-to-submit
+packet. Let me show you."
+
+*(Then go straight into the live demo — Beats 2–4 in PART 2.)*
+
+---
+
 ## ✅ PART 0 — Pre-flight checklist (do ALL of this before you hit record)
 
 - [ ] **OpenAI credits added** and the smoke test returns a real dossier (not a 429 error).

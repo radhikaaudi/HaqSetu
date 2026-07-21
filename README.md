@@ -65,28 +65,52 @@ bus-ride to be turned away and humiliated, this isn't a nicety — it's the whol
 
 ## How I used Codex and GPT-5.6
 
-I built HaqSetu with **OpenAI Codex (CLI, inside VS Code)** driving the
-`gpt-5.6-terra` model. The build playbook I worked through phase-by-phase is in
-[`CODEX_PROMPTS.md`](./CODEX_PROMPTS.md).
+I built HaqSetu **end-to-end with OpenAI Codex (CLI, inside VS Code)** driving the
+`gpt-5.6-terra` model. My primary build session is recorded via Codex `/feedback`
+(Session ID `019f7e4a-e251-7ca0-b345-534566d07c2e`), and the exact playbook I
+worked through, prompt by prompt, is in [`CODEX_PROMPTS.md`](./CODEX_PROMPTS.md).
 
-**Where Codex accelerated the build:** scaffolding the five-agent pipeline,
-generating the `zod` schemas that guard every model boundary, wiring `pdf-lib` to
-fill real form fields, and — importantly — **writing the test cases** so I could
-trust each piece as I built it (`npm test`, 7 passing).
+### How I used Codex (phase by phase)
 
-**The decisions I owned** are the ones that make or break the product: putting the
-rules engine at the core instead of the model, and making the Verifier a hard gate
-rather than a warning. Codex accelerated the *how*; the *what to refuse to build*
-stayed with me.
+I drove the whole build from the Codex CLI, one focused task per prompt, committing
+after each phase so no rate-limit reset ever cost progress:
 
-**Which GPT-5.6 capabilities power which agent:**
+1. **Scaffold + vertical slice** — Codex set up the TypeScript/Express project, wrote
+   the `zod` data model (`server/types.ts`), and built the deterministic evaluator
+   (`server/engine/evaluate.ts`) with the first passing test — proving one scheme
+   worked end-to-end before adding breadth.
+2. **Intake agent** — Codex wrote `server/agents/intake.ts` (voice/text → structured,
+   provenance-carrying facts), with a Hindi-transcript test.
+3. **Entitlement engine** — the concurrent, one-agent-per-scheme fan-out in
+   `server/agents/entitlement.ts`, with code as the sole eligibility authority.
+4. **Action builder** — `server/agents/action.ts`, wiring `pdf-lib` to fill real
+   government-form PDFs field by field via a tool call.
+5. **Decoder + Verifier** — the GPT-5.6 vision decoder (`server/agents/decoder.ts`)
+   and the citation gate (`server/engine/verifier.ts`).
+6. **Frontend** — the phone-sized, voice-first React app in `web/` (Hindi/Marathi/English).
+7. **Hardening** — with Codex I then made the model calls genuinely load-bearing,
+   added the rate-limit + in-memory-PII security fixes, wired real cited rules from
+   the UP SSPY portal, and fixed PDF encoding for non-Latin names.
 
-| Capability | Where it's used |
+Codex also **wrote the test suite** (`npm test`, 7 passing) — and because those tests
+mock the model, they run for free, which let me catch regressions *before* spending a
+live API call. Throughout, Codex accelerated the *how*; the decisions that make or
+break the product stayed with me: **putting a deterministic rules engine at the core
+instead of the model, making the Verifier a hard gate rather than a warning, refusing
+to auto-submit on a citizen's behalf, and choosing depth (real, cited rules for a few
+schemes) over breadth.**
+
+### How GPT-5.6 powers each stage (concretely)
+
+All model access goes through one thin edge wrapper, `server/llm/client.ts`, using the
+OpenAI SDK's `chat.completions` API with a configurable `reasoning_effort` knob.
+
+| GPT-5.6 capability | How it's used, and where |
 |---|---|
-| **Structured output** (schema-enforced JSON) | Intake facts, decoded documents, localized explanations — validated at every boundary so a malformed response can never leak downstream |
-| **Multimodal / vision** | The document decoder reads a photographed government paper and extracts only image-grounded facts |
-| **Multi-agent orchestration** | The entitlement engine fans out **one agent per scheme, concurrently** — a genuine parallel system, not one mega-prompt |
-| **Programmatic tool calling** | The action builder's `map_pdf_fields` tool: the model *selects* fillable fields; code fills the values |
+| **Structured output** (schema-enforced JSON) | `client.parse()` uses `chat.completions.parse` with `zodResponseFormat`, so the model *must* return schema-valid JSON or it is rejected — used for intake facts (`intake.ts`) and the localized "why" explanations (`entitlement.ts`). Every extracted fact carries `provenance` + `confidence`. |
+| **Multimodal / vision** | `client.parseVision()` sends the photographed document as an `image_url` (`detail: "high"`); `decoder.ts` returns the doc type, plain-language summary, deadline, risk level, and **only image-grounded facts** (nulls if the page is unreadable — it never guesses). |
+| **Multi-agent orchestration** | `entitlement.ts` runs one `runSchemeAgent` per scheme via `Promise.all` — **concurrent GPT-5.6 agents**, each explaining its scheme in the user's language, while `evaluateScheme()` (code) alone decides eligibility. |
+| **Programmatic tool calling** | `client.callPdfMappingTool()` defines a `strict` `map_pdf_fields` function; in `action.ts` the model's field **selection is load-bearing**, but code supplies every value from a provenance-carrying fact — the model is structurally forbidden from inventing one. |
 
 ---
 

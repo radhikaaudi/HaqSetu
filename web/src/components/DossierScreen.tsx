@@ -151,6 +151,12 @@ function EntitlementCard({
         </ul>
       )}
 
+      {entitlement.source && (entitlement.status === "eligible" || entitlement.status === "likely") && (
+        <a className="source-link" href={entitlement.source.url} target="_blank" rel="noreferrer">
+          📖 {t.rule_source}: {entitlement.source.name}
+        </a>
+      )}
+
       {entitlement.status === "missing_info" && entitlement.missing_facts?.length ? (
         <div className="needs-block">
           <div className="needs-title">{t.needs_info_hint}</div>

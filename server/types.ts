@@ -51,18 +51,23 @@ export type RuleOperator = z.infer<typeof RuleOperatorSchema>;
 export const SchemeRuleSchema = z.object({
   id: z.string(), fact: z.string(), op: RuleOperatorSchema, value: z.unknown().optional(), explain: LocalizedTextSchema
 });
+// Where a scheme's rules were sourced from, so the dossier can cite the authority, not just assert.
+export const SchemeSourceSchema = z.object({ name: z.string(), url: z.string(), retrieved: z.string() });
+export type SchemeSource = z.infer<typeof SchemeSourceSchema>;
 export const SchemeSchema = z.object({
   id: z.string(), name: LocalizedTextSchema, authority: z.string(), benefit: z.record(z.string(), z.unknown()),
+  source: SchemeSourceSchema.optional(),
   eligibility: z.array(SchemeRuleSchema),
   required_documents: z.array(z.object({ id: z.string(), name: LocalizedTextSchema })),
   form: z.object({ template: z.string(), fields: z.array(z.object({ pdf_field: z.string(), from_fact: z.string() })) }),
   submission: z.object({ where: LocalizedTextSchema, deadline: z.string().nullable() })
-});
+}).passthrough();
 export type Scheme = z.infer<typeof SchemeSchema>;
 
 export const EntitlementVerdictSchema = z.object({
   scheme_id: z.string(), scheme_name: LocalizedTextSchema,
   status: z.enum(["eligible", "likely", "missing_info", "not_eligible"]), benefit: z.record(z.string(), z.unknown()),
+  source: SchemeSourceSchema.optional(),
   matched_rules: z.array(z.object({ id: z.string(), explain: LocalizedTextSchema })),
   failed_rules: z.array(z.object({ id: z.string(), explain: LocalizedTextSchema })).optional(),
   missing_facts: z.array(z.string()).optional(), required_documents: z.array(z.unknown())

@@ -14,11 +14,18 @@ export interface RuleCitation {
 
 export type VerdictStatus = "eligible" | "likely" | "missing_info" | "not_eligible";
 
+export interface SchemeSource {
+  name: string;
+  url: string;
+  retrieved: string;
+}
+
 export interface Entitlement {
   scheme_id: string;
   scheme_name: Localized;
   status: VerdictStatus;
   benefit: Record<string, unknown>;
+  source?: SchemeSource;
   matched_rules: RuleCitation[];
   failed_rules?: RuleCitation[];
   missing_facts?: string[];

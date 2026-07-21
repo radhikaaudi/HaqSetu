@@ -29,6 +29,7 @@ export function evaluateScheme(profile: CitizenProfile, scheme: Scheme): Entitle
   const status = missing_facts.length > 0 ? "missing_info" : failed_rules.length > 0 ? "not_eligible" : "eligible";
   return {
     scheme_id: scheme.id, scheme_name: scheme.name, status, benefit: scheme.benefit, matched_rules,
+    ...(scheme.source ? { source: scheme.source } : {}),
     ...(failed_rules.length ? { failed_rules } : {}), ...(missing_facts.length ? { missing_facts } : {}),
     required_documents: scheme.required_documents
   };

@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { fetchDossier } from "./api";
 import { LANGUAGES, UI } from "./i18n";
 import { HomeScreen } from "./components/HomeScreen";
@@ -7,6 +7,32 @@ import { stopSpeaking } from "./speech";
 import type { ClaimDossier, Lang } from "./types";
 
 type Screen = "home" | "loading" | "dossier" | "error";
+
+const LOADING_STAGES = ["stage_understand", "stage_match", "stage_fill", "stage_verify"] as const;
+
+/** Makes the pipeline's real stages visible while the one-shot request runs, instead of a dead spinner. */
+function LoadingStages({ lang }: { lang: Lang }) {
+  const t = UI[lang];
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setActive((i) => Math.min(i + 1, LOADING_STAGES.length - 1)), 1500);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div className="status-panel" role="status" aria-live="polite">
+      <div className="spinner" aria-hidden />
+      <h2>{t.working}</h2>
+      <ul className="stage-list">
+        {LOADING_STAGES.map((key, i) => (
+          <li key={key} className={i < active ? "done" : i === active ? "active" : "pending"}>
+            <span className="stage-dot" aria-hidden>{i < active ? "✓" : i === active ? "●" : "○"}</span>
+            {t[key]}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 
 export function App() {
   const [lang, setLang] = useState<Lang>("hi");
@@ -70,13 +96,7 @@ export function App() {
       <main className="app-main">
         {screen === "home" && <HomeScreen lang={lang} speechLang={speechLang} onSubmit={submit} />}
 
-        {screen === "loading" && (
-          <div className="status-panel" role="status" aria-live="polite">
-            <div className="spinner" aria-hidden />
-            <h2>{t.working}</h2>
-            <p>{t.working_hint}</p>
-          </div>
-        )}
+        {screen === "loading" && <LoadingStages lang={lang} />}
 
         {screen === "dossier" && dossier && (
           <DossierScreen lang={lang} speechLang={speechLang} dossier={dossier} onReset={reset} />

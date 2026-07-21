@@ -17,7 +17,7 @@ const fakeVision: VisionStructuredOutputClient = {
 const voice = <T>(value: T) => ({ value, confidence: 1, provenance: { source: "voice" as const, utterance: "test" } });
 
 test("decoded income certificate merges a sourced fact and unlocks widow pension", async () => {
-  const profile: CitizenProfile = { marital_status: voice("widow"), state: voice("Uttar Pradesh"), raw_documents: [] };
+  const profile: CitizenProfile = { marital_status: voice("widow"), age: voice(45), state: voice("Uttar Pradesh"), raw_documents: [] };
   const document = await decodeDocument("aGVsbG8=", "hi", fakeVision);
   const merged = mergeDecodedDocument(profile, document);
   const scheme = SchemeSchema.parse(JSON.parse(await (await import("node:fs/promises")).readFile(new URL("../schemes/widow_pension.json", import.meta.url), "utf8")));

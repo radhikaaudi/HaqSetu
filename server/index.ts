@@ -8,8 +8,23 @@ import { verifyDossier } from "./engine/verifier.js";
 import { CitizenProfileSchema, ClaimDossierSchema, type CitizenProfile } from "./types.js";
 
 const app = express();
-app.use(express.json({ limit: "25mb" }));
-app.use("/generated", express.static("generated"));
+
+// Simple in-memory per-IP rate limit — enough to stop a stranger draining the OpenAI budget.
+const RATE_MAX = 40;
+const RATE_WINDOW_MS = 60_000;
+const hits = new Map<string, { count: number; reset: number }>();
+app.use((request, response, next) => {
+  const ip = request.ip ?? "unknown";
+  const now = Date.now();
+  const entry = hits.get(ip);
+  if (!entry || now > entry.reset) { hits.set(ip, { count: 1, reset: now + RATE_WINDOW_MS }); return next(); }
+  if (entry.count >= RATE_MAX) return response.status(429).json({ error: "Too many requests — please slow down." });
+  entry.count += 1;
+  return next();
+});
+
+// 8mb comfortably holds one document photo; larger bodies are rejected, not buffered.
+app.use(express.json({ limit: "8mb" }));
 app.get("/health", (_request, response) => response.json({ status: "ok" }));
 app.post("/intake", async (request, response) => {
   const { transcript, language } = request.body ?? {};

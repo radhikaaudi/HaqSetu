@@ -50,7 +50,12 @@ type UiKey =
   | "verifier_note"
   | "error_title"
   | "try_again"
-  | "nothing_yet";
+  | "nothing_yet"
+  | "rule_source"
+  | "stage_understand"
+  | "stage_match"
+  | "stage_fill"
+  | "stage_verify";
 
 export const UI: Record<Lang, Record<UiKey, string>> = {
   hi: {
@@ -91,7 +96,12 @@ export const UI: Record<Lang, Record<UiKey, string>> = {
     verifier_note: "हर हक़ किसी नियम से और हर भरा खाना किसी तथ्य से जुड़ा है — HaqSetu अंदाज़ा नहीं लगाता।",
     error_title: "कुछ गड़बड़ हो गई",
     try_again: "दोबारा कोशिश करें",
-    nothing_yet: "बोलिए या कागज़ की फोटो लगाइए"
+    nothing_yet: "बोलिए या कागज़ की फोटो लगाइए",
+    rule_source: "नियम का स्रोत",
+    stage_understand: "आपकी बात समझ रहे हैं",
+    stage_match: "आपके हक़ खोज रहे हैं",
+    stage_fill: "आपके फॉर्म भर रहे हैं",
+    stage_verify: "हर हक़ को उसके नियम से मिला रहे हैं"
   },
   mr: {
     tagline: "जो कागद तुम्ही वाचू शकत नाही, त्यातून तुमच्या हक्कांपर्यंत",
@@ -131,7 +141,12 @@ export const UI: Record<Lang, Record<UiKey, string>> = {
     verifier_note: "प्रत्येक हक्क एका नियमाशी आणि प्रत्येक भरलेलं रकाना एका तथ्याशी जोडलेलं आहे — HaqSetu अंदाज लावत नाही.",
     error_title: "काहीतरी चुकलं",
     try_again: "पुन्हा प्रयत्न करा",
-    nothing_yet: "बोला किंवा कागदाचा फोटो लावा"
+    nothing_yet: "बोला किंवा कागदाचा फोटो लावा",
+    rule_source: "नियमाचा स्रोत",
+    stage_understand: "तुमचं बोलणं समजून घेत आहोत",
+    stage_match: "तुमचे हक्क शोधत आहोत",
+    stage_fill: "तुमचे फॉर्म भरत आहोत",
+    stage_verify: "प्रत्येक हक्क त्याच्या नियमाशी जुळवत आहोत"
   },
   en: {
     tagline: "From paper you can't read to the rights you're owed",
@@ -171,7 +186,12 @@ export const UI: Record<Lang, Record<UiKey, string>> = {
     verifier_note: "Every right is backed by a rule and every filled field by a fact — HaqSetu never guesses.",
     error_title: "Something went wrong",
     try_again: "Try again",
-    nothing_yet: "Speak, or add a photo of a paper"
+    nothing_yet: "Speak, or add a photo of a paper",
+    rule_source: "Rule source",
+    stage_understand: "Understanding what you told us",
+    stage_match: "Finding the benefits you qualify for",
+    stage_fill: "Filling your official forms",
+    stage_verify: "Checking every claim against its rule"
   }
 };
 

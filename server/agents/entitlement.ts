@@ -5,9 +5,6 @@ import { evaluateScheme } from "../engine/evaluate.js";
 import { HaqSetuLlmClient } from "../llm/client.js";
 import { SchemeSchema, type CitizenProfile, type EntitlementVerdict, type Scheme } from "../types.js";
 
-const FactMappingSchema = z.object({
-  mappings: z.array(z.object({ rule_id: z.string(), fact_path: z.string(), source_fact: z.string().nullable() }))
-});
 const WhySchema = z.object({
   explanations: z.array(z.object({ id: z.string(), text: z.string() }))
 });
@@ -23,8 +20,9 @@ export async function loadSchemes(schemesDirectory = path.resolve(process.cwd(),
 }
 
 /**
- * Runs one GPT-backed scheme agent per scheme concurrently. GPT maps typed facts and
- * writes localized explanations; evaluateScheme remains the sole eligibility authority.
+ * Runs one GPT-backed scheme agent per scheme concurrently. Each agent writes the localized,
+ * plain-language "why" in the user's language; evaluateScheme (code) remains the sole eligibility
+ * authority — the model never sees or influences the eligible/not decision.
  */
 export async function runEntitlementEngine(profile: CitizenProfile, options: EntitlementOptions = {}): Promise<EntitlementVerdict[]> {
   const schemes = await loadSchemes(options.schemesDirectory);
@@ -36,12 +34,7 @@ export async function runEntitlementEngine(profile: CitizenProfile, options: Ent
 }
 
 async function runSchemeAgent(profile: CitizenProfile, scheme: Scheme, language: string, llm: EntitlementLlmClient): Promise<EntitlementVerdict> {
-  const context = JSON.stringify({ scheme: { id: scheme.id, eligibility: scheme.eligibility }, profile });
-  // This mapping is advisory only. It can never add facts or change the evaluator input.
-  await llm.parse(context,
-    "Identify which existing, provenance-carrying profile facts correspond to each scheme rule. Do not infer values or eligibility.",
-    FactMappingSchema, "scheme_fact_mapping");
-
+  // Code decides eligibility first; the model is only ever asked to explain that decision.
   const verdict = evaluateScheme(profile, scheme);
   const explanations = await llm.parse(JSON.stringify({ scheme, verdict, language }),
     "Write one short, plain-language explanation for each supplied matched or failed rule in the requested language. Do not change rule IDs, add rules, infer facts, or state eligibility; eligibility is code-determined.",

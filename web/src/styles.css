@@ -299,6 +299,45 @@ button { font-family: inherit; cursor: pointer; }
 
 .empty-note { background: var(--card); border: 1px dashed var(--line); border-radius: 12px; padding: 16px; color: var(--muted); text-align: center; }
 
+/* Rule-source citation on an entitlement card */
+.source-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--teal-dark);
+  text-decoration: none;
+  border-bottom: 1px dotted var(--teal);
+}
+.source-link:hover { color: var(--teal); }
+
+/* Staged loading: the pipeline's real steps, made visible */
+.stage-list {
+  list-style: none;
+  margin: 22px auto 0;
+  padding: 0;
+  max-width: 300px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.stage-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  transition: color 0.3s, opacity 0.3s;
+}
+.stage-list .stage-dot { flex: none; width: 22px; text-align: center; font-size: 15px; }
+.stage-list li.pending { color: var(--muted); opacity: 0.55; }
+.stage-list li.active { color: var(--ink); font-weight: 700; }
+.stage-list li.active .stage-dot { color: var(--teal); animation: pulse-dot 1s ease-in-out infinite; }
+.stage-list li.done { color: var(--green); }
+.stage-list li.done .stage-dot { color: var(--green); }
+
+@keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
 @media (max-width: 380px) {
   body { font-size: 17px; }
   .app-main { padding: 12px; }
